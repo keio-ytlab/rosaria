@@ -130,6 +130,9 @@ class RosAriaNode
     // Robot Calibration Parameters (see readParameters() function)
     int TicksMM, DriftFactor, RevCount;  //If TicksMM or RevCount are <0, don't use. If DriftFactor is -99999, don't use (DriftFactor could be 0 or negative).
     
+    // added parameters
+    double trans_vel_max, rot_vel_max;
+
     // dynamic_reconfigure
     dynamic_reconfigure::Server<rosaria::RosAriaConfig> *dynamic_reconfigure_server;
 
@@ -179,6 +182,32 @@ void RosAriaNode::readParameters()
     ROS_INFO("This robot's RevCount parameter: %d", RevCount);
     //n_.setParam( "RevCount", RevCount);
   }
+
+  //
+  // Velocity Parameters
+  //
+  if (n_.getParam("trans_vel_max", trans_vel_max) && trans_vel_max > 0)
+  {
+    ROS_INFO("Setting robot trans_vel_max from ROS Parameter: %f", trans_vel_max);
+    robot->setAbsoluteMaxTransVel(trans_vel_max);
+    robot->setTransVelMax(trans_vel_max);
+  }
+  if (n_.getParam("rot_vel_max", rot_vel_max) && rot_vel_max > 0)
+  {
+    ROS_INFO("Setting robot rot_vel_max from ROS Parameter: %f", rot_vel_max);
+    robot->setAbsoluteMaxRotVel(rot_vel_max);
+    robot->setRotVelMax(rot_vel_max);
+  }
+
+  ROS_INFO("==========================================");
+  ROS_INFO("        Maximum Velocity Parameters");
+  ROS_INFO("==========================================");
+  ROS_INFO("AbsoluteMaxTransVel : %f", robot->getAbsoluteMaxTransVel());
+  ROS_INFO("AbsoluteMaxRotVel   : %f", robot->getAbsoluteMaxRotVel());
+  ROS_INFO("TransVelMax         : %f", robot->getTransVelMax());
+  ROS_INFO("RotVelMax           : %f", robot->getRotVelMax());
+  ROS_INFO("==========================================");
+
   robot->unlock();
 }
 
@@ -256,6 +285,7 @@ void RosAriaNode::dynamic_reconfigureCB(rosaria::RosAriaConfig &config, uint32_t
     ROS_INFO("Setting RotDecel from Dynamic Reconfigure: %d", value);
     robot->setRotDecel(value);
   } 
+
   robot->unlock();
 }
 
